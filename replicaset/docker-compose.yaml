@@ -1,0 +1,73 @@
+services:
+  mongo1:
+    image: mongo:7.0
+    container_name: mongo1
+    command: mongod --replSet rs_noscites --bind_ip_all --port 27017
+    ports:
+      - "27021:27017"
+    networks:
+      - mongo-network
+    volumes:
+      - mongo1-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo2:
+    image: mongo:7.0
+    container_name: mongo2
+    command: mongod --replSet rs_noscites --bind_ip_all --port 27017
+    ports:
+      - "27022:27017"
+    networks:
+      - mongo-network
+    volumes:
+      - mongo2-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongo3:
+    image: mongo:7.0
+    container_name: mongo3
+    command: mongod --replSet rs_noscites --bind_ip_all --port 27017
+    ports:
+      - "27023:27017"
+    networks:
+      - mongo-network
+    volumes:
+      - mongo3-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  # Dedicated client container for running mongosh commands
+  # inside the Docker network. Simplifies connection to the ReplicaSet.
+  mongo-client:
+    image: mongo:7.0
+    container_name: mongo-client
+    networks:
+      - mongo-network
+    volumes:
+      - ./scripts:/scripts
+      - client-data:/data
+    command: sleep infinity
+    depends_on:
+      - mongo1
+      - mongo2
+      - mongo3
+
+networks:
+  mongo-network:
+    driver: bridge
+
+volumes:
+  mongo1-data:
+  mongo2-data:
+  mongo3-data:
+  client-data:

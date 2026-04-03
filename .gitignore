@@ -1,0 +1,31 @@
+# ─── Python ───────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+env/
+
+# ─── Données (trop volumineuses) ──────────────────────
+data/*
+!data/.gitkeep
+
+# ─── Dumps MongoDB (binaires) ─────────────────────────
+**/*.bson
+**/dump_noscites/
+
+# ─── Volumes Docker ───────────────────────────────────
+sharding/data/configdb/
+sharding/data/db/
+
+# ─── VS Code ──────────────────────────────────────────
+.vscode/
+
+# ─── Sandbox (brouillons personnels) ──────────────────
+sandbox/
+
+# ─── Jupyter checkpoints ──────────────────────────────
+.ipynb_checkpoints/
+
+# ─── Power BI (partagé via Google Drive) ──────────────
+*.pbix

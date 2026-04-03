@@ -1,0 +1,154 @@
+services:
+# ========================================================
+# ===== CONFIG SERVER REPLICA SET (noscites_cfg_rs) ======
+# ========================================================
+  noscites-cfg1:
+    image: mongo:7.0
+    container_name: noscites-cfg1
+    command: mongod --configsvr --replSet noscites_cfg_rs --bind_ip_all --port 27017
+    ports:
+      - "27071:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-cfg1-data:/data/configdb
+
+  noscites-cfg2:
+    image: mongo:7.0
+    container_name: noscites-cfg2
+    command: mongod --configsvr --replSet noscites_cfg_rs --bind_ip_all --port 27017
+    ports:
+      - "27072:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-cfg2-data:/data/configdb
+
+  noscites-cfg3:
+    image: mongo:7.0
+    container_name: noscites-cfg3
+    command: mongod --configsvr --replSet noscites_cfg_rs --bind_ip_all --port 27017
+    ports:
+      - "27073:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-cfg3-data:/data/configdb
+# ============================================================
+# ===== SHARD "PARIS" - REPLICA SET (noscites_shard1_rs) =====
+# ============================================================
+  noscites-shard1-1:
+    image: mongo:7.0
+    container_name: noscites-shard1-1
+    command: mongod --shardsvr --replSet noscites_shard1_rs --bind_ip_all --port 27017
+    ports:
+      - "27081:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-shard1-1-data:/data/db
+
+  noscites-shard1-2:
+    image: mongo:7.0
+    container_name: noscites-shard1-2
+    command: mongod --shardsvr --replSet noscites_shard1_rs --bind_ip_all --port 27017
+    ports:
+      - "27082:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-shard1-2-data:/data/db
+
+  noscites-shard1-3:
+    image: mongo:7.0
+    container_name: noscites-shard1-3
+    command: mongod --shardsvr --replSet noscites_shard1_rs --bind_ip_all --port 27017
+    ports:
+      - "27083:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-shard1-3-data:/data/db
+
+# =============================================================
+# ===== SHARD "LYON" - REPLICA SET (noscites_shard2_rs) =======
+# =============================================================
+  noscites-shard2-1:
+    image: mongo:7.0
+    container_name: noscites-shard2-1
+    command: mongod --shardsvr --replSet noscites_shard2_rs --bind_ip_all --port 27017
+    ports:
+      - "27091:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-shard2-1-data:/data/db
+
+  noscites-shard2-2:
+    image: mongo:7.0
+    container_name: noscites-shard2-2
+    command: mongod --shardsvr --replSet noscites_shard2_rs --bind_ip_all --port 27017
+    ports:
+      - "27092:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-shard2-2-data:/data/db
+
+  noscites-shard2-3:
+    image: mongo:7.0
+    container_name: noscites-shard2-3
+    command: mongod --shardsvr --replSet noscites_shard2_rs --bind_ip_all --port 27017
+    ports:
+      - "27093:27017"
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - noscites-shard2-3-data:/data/db
+
+# ========================================================
+# ===== MONGOS (Query Router) ============================
+# ========================================================  
+  noscites-mongos:
+    image: mongo:7.0
+    container_name: noscites-mongos
+    command: mongos --configdb noscites_cfg_rs/noscites-cfg1:27017,noscites-cfg2:27017,noscites-cfg3:27017 --bind_ip_all --port 27017
+    ports:
+      - "27100:27017"
+    networks:
+      - noscites-sharding-network
+    depends_on:
+      - noscites-cfg1
+      - noscites-cfg2
+      - noscites-cfg3
+# ========================================================
+# ===== CLIENT (pour l'administration et le restore) =====
+# ========================================================
+  noscites-client:
+    image: mongo:7.0
+    container_name: noscites-client
+    networks:
+      - noscites-sharding-network
+    volumes:
+      - ./scripts:/scripts
+      - ./data:/data
+    command: sleep infinity
+    depends_on:
+      - noscites-mongos
+      - noscites-shard1-1
+      - noscites-shard2-1
+
+networks:
+  noscites-sharding-network:
+    driver: bridge
+
+volumes:
+  noscites-cfg1-data:
+  noscites-cfg2-data:
+  noscites-cfg3-data:
+  noscites-shard1-1-data:
+  noscites-shard1-2-data:
+  noscites-shard1-3-data:
+  noscites-shard2-1-data:
+  noscites-shard2-2-data:
+  noscites-shard2-3-data:
